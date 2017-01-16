@@ -47,6 +47,7 @@ void Graph::BFS(int start)
         check[i]=false;
     queue<int> q;
     q.push(start);
+    check[start]=true;
     int temp;
     while(!q.empty())
     {
@@ -58,13 +59,10 @@ void Graph::BFS(int start)
             if(check[*i]==false)
             {
                 q.push(*i);
-                check[*i]==true;
-                
-            
-        }
+                check[*i]=true;   
+            }
+        }    
     }
-    
-}
 }
 int main()
 { 
