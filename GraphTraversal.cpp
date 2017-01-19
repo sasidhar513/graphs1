@@ -48,6 +48,8 @@ class Graph
     void DFS(int start);
     //Returns true if there are any cycles 
     bool DetectCycleDirected();
+    void LongestPathUndirectedGraphUtil(int root,int current,bool *visited,int * distance,int sum);
+    void LongestPathUndirectedGraph();    
 };
 Graph::Graph(int vertices,bool isDirected)
 {   
@@ -157,8 +159,7 @@ bool Graph::DetectCycleDirected()
 }
 bool Graph::DCDUtil(int start,bool *check,bool *loop)
 {
-    if(loop[start]==true)
-        return true;
+    if(loop[start]==true)      
     if(check[start]==true)
         return false;
     check[start]=true;
@@ -174,21 +175,57 @@ bool Graph::DCDUtil(int start,bool *check,bool *loop)
     loop[start]=false;
     return out;
 }
+void Graph::LongestPathUndirectedGraphUtil(int root,int current,bool *visited,int * distance,int sum)
+{
+    if(visited[current]==false)
+    {
+        visited[current]=true;
+        if(distance[current]<sum)
+            distance[current]=sum; 
+        for(list<AdjacentNode>::iterator i=adj[current].begin();i!=adj[current].end();i++)
+        {
+            int tempNode,tempSum;
+            tempSum=(*i).distance;
+            tempNode=(*i).v;
+            LongestPathUndirectedGraphUtil(root,tempNode,visited,distance,sum+tempSum);           
+        }
+        visited[current]=false;
+    }
+}
+
+void Graph::LongestPathUndirectedGraph()
+{
+    int sum=0;
+    bool *visited=new bool[vertices];
+    int *distance=new int[vertices];
+    for(int i=0;i<vertices;i++)
+    {
+        visited[i]=false;
+        distance[i]=0;
+    }
+    LongestPathUndirectedGraphUtil(0,0,visited,distance,sum);
+    cout<<endl;
+    cout<<endl;
+    for(int i=0;i<vertices;i++)
+        cout<<distance[i]<<" ";
+}
+
+
 int main()
 { 
      // Create a graph given in the above diagram
     Graph g(4,false);
-    g.addEdge(0, 1);
-    g.addEdge(0, 2);
-    g.addEdge(1, 2);
-    g.addEdge(2, 0);
-    g.addEdge(2, 3);
-    g.addEdge(3, 3);
+    g.addEdge(0, 1,6);
+    g.addEdge(1, 2,20);
+    g.addEdge(1, 3,30);
+   // g.addEdge(2, 0);
+    g.addEdge(2, 3,1);
+   // g.addEdge(3, 3);
 
  
     cout << "Following is Breadth First Traversal "
          << "(starting from vertex 2) \n";
-    g.BFS(2);
+   g.LongestPathUndirectedGraph();
 
     cout<<g.DetectCycleDirected();
     return 0;
