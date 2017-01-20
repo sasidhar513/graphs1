@@ -54,7 +54,7 @@ class Graph
     void TopologicalSortUtil(int source,bool * visited,stack<int> order);
     void TopologicalSort();
     stack<int> findMinPathUtil(int start,bool * visited,map<int ,stack<int>> stored);
-    void findMinPathUtil();
+    void findMinPath();
 
     /*
     this method is used to create a graph  for snakes and ladders game 
@@ -324,43 +324,83 @@ void Graph::CreateSnakeAndLadder(int ladders,int snakes)
             }
     }   
 }
-
+void print(stack<int> initial)
+{
+    cout<<endl;
+    while(initial.size()>0)
+    {
+        cout<<initial.top()<<" ";
+        initial.pop();
+    }
+    cout<<endl;
+}
 stack<int> Graph::findMinPathUtil(int start,bool * visited,map<int ,stack<int>> stored)
 {
     if(visited[start]==false)
     {
-        visited[start]=false;
+        visited[start]=true;
         stack<int> out;
         int j=0;
         for(list<AdjacentNode>::iterator i=adj[start].begin();i!=adj[start].end();i++)
         {
+
             stack<int> temp;
             if(j==0)
-                out=findMinPath((*i).v,visited,stored);
+            {
+                out=findMinPathUtil((*i).v,visited,stored);
+                cout<<start<<"            "<<(*i).v<<" "<<out.size()<<endl;
+
+            }
             else 
             {
-                temp=findMinPath((*i).v,visited,stored);
+                temp=findMinPathUtil((*i).v,visited,stored);
                 if(temp.size()>0&&temp.size()<out.size())
                     out=temp;
+                cout<<start<<"            "<<(*i).v<<" "<<out.size()<<endl;
+
             }
+            j++;
         }
         out.push(start);
         stored[start]=out;
+        
         return out;
     }
-    else 
+    else
+    {
+        cout<<"else case called";
+        print(stored[start]);
         return stored[start];
+    }
+}
+void Graph::findMinPath()
+{
+    bool * visited=new bool[vertices];
+    map<int,stack<int> >stored;
+    stack<int> initial;
+    for(int i=0;i<vertices;i++)
+    {
+        visited[i]=false;
+        stored[i]=initial;
+    }
+    initial=findMinPathUtil(0,visited,stored);
+    cout<<endl;
+    while(initial.size()>0)
+    {
+        cout<<initial.top()<<" ";
+        initial.pop();
+    }
 }
 
 void Graph::showGraph()
 {
     for(int i=0;i<vertices;i++)
     {
-        cout<<i+1<<"\t";
+        cout<<i<<"\t";
         
         for(list<AdjacentNode>::iterator j=adj[i].begin();j!=adj[i].end();j++)
         {
-            cout<<(*j).v+1<<" ";
+            cout<<(*j).v<<" ";
         }
         cout<<endl;
         
@@ -383,6 +423,7 @@ int main()
 
     //cout<<g.DetectCycleDirected();
     g.showGraph();
+    g.findMinPath();
     return 0;
 
 }
