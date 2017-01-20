@@ -6,6 +6,7 @@
 #include <vector> 
 #include <list>
 #include <queue>
+#include <stack>
 #include <set>
 #include <map>
 #include <string>
@@ -49,7 +50,61 @@ class Graph
     //Returns true if there are any cycles 
     bool DetectCycleDirected();
     void LongestPathUndirectedGraphUtil(int root,int current,bool *visited,int * distance,int sum);
-    void LongestPathUndirectedGraph();    
+    void LongestPathUndirectedGraph();  
+    void TopologicalSortUtil(int source,bool * visited,stack<int> order);
+    void TopologicalSort();
+    /*
+    this method is used to create a graph  for snakes and ladders game 
+       input no of ladders and no of snakes 
+       and give input from console as
+            //ladders
+                3 22 
+                5 8
+                11 26
+                20 29
+            //snakes
+                19 7
+                17 4
+                21 9
+                27 1
+    the graph generated will contain all the possibilities of game all the paths that one can travel 
+    eg
+    In short this converts the snake and ladder game into graph;
+    for a game shown in geeks for geeks ref: http://www.geeksforgeeks.org/snake-ladder-problem-2/
+    the output shown wil be equal to 
+        1	2 22 4 8 6 7 
+        2	22 4 8 6 7 8 
+        3	
+        4	8 6 7 8 9 10 
+        5	
+        6	7 8 9 10 26 12 
+        7	8 9 10 26 12 13 
+        8	9 10 26 12 13 14 
+        9	10 26 12 13 14 15 
+        10	26 12 13 14 15 16 
+        11	
+        12	13 14 15 16 4 18 
+        13	14 15 16 4 18 7 
+        14	15 16 4 18 7 29 
+        15	16 4 18 7 29 9 
+        16	4 18 7 29 9 22 
+        17	
+        18	7 29 9 22 23 24 
+        19	
+        20	
+        21	
+        22	23 24 25 26 1 28 
+        23	24 25 26 1 28 29 
+        24	25 26 1 28 29 30 
+        25	26 1 28 29 30 
+        26	1 28 29 30 
+        27	
+        28	29 30 
+        29	30 
+        30	
+*/
+    void CreateSnakeAndLadder(int ladders,int snakes);
+    void showGraph();
 };
 Graph::Graph(int vertices,bool isDirected)
 {   
@@ -192,7 +247,6 @@ void Graph::LongestPathUndirectedGraphUtil(int root,int current,bool *visited,in
         visited[current]=false;
     }
 }
-
 void Graph::LongestPathUndirectedGraph()
 {
     int sum=0;
@@ -209,25 +263,95 @@ void Graph::LongestPathUndirectedGraph()
     for(int i=0;i<vertices;i++)
         cout<<distance[i]<<" ";
 }
-
-
+void Graph::TopologicalSortUtil(int source,bool * visited,stack<int> order)
+{
+    if(visited[source]==false)
+    {
+        visited[source]=true;
+        for(list<AdjacentNode>::iterator i=adj[source].begin();i!=adj[source].end();i++)
+        {
+            TopologicalSortUtil((*i).v,visited,order);
+            
+        }
+        order.push(source);
+    }
+    
+}
+void Graph::TopologicalSort()
+{
+    stack<int> s;
+    bool *visited= new bool[vertices];
+    for(int i=0;i<vertices;i++)
+        visited[i]=false;
+    TopologicalSortUtil(0,visited,s);
+    while(!s.empty())
+    {
+        cout<<s.top();
+        s.pop();
+    }
+}
+void Graph::CreateSnakeAndLadder(int ladders,int snakes)
+{
+    map<int,int> laddersTail,laddersHead,snakesHead,snakesTail;
+    int head,tail;
+    for(int i=0;i<ladders;i++)
+    {    
+        cin>>tail>>head;
+        laddersHead[tail-1]=head-1;
+        laddersTail[head-1]=tail-1;        
+    }
+    for(int i=0;i<snakes;i++)
+    {
+        cin>>head>>tail;
+        snakesHead[tail-1]=head-1;
+        snakesTail[head-1]=tail-1;
+    }
+    for(int i=0;i<vertices;i++)
+    {
+        if(laddersHead.find(i)==laddersHead.end()&&snakesTail.find(i)==snakesTail.end())
+            for(int j=i+1;j<=i+6;j++)
+            {   if(j==vertices)
+                break;
+                if(laddersHead.find(j)!=laddersHead.end())
+                    addEdge(i,laddersHead[j]);
+                else if(snakesTail.find(j)!=snakesTail.end())
+                    addEdge(i,snakesTail[j]);
+                else 
+                    addEdge(i,j);
+            }
+    }   
+}
+void Graph::showGraph()
+{
+    for(int i=0;i<vertices;i++)
+    {
+        cout<<i+1<<"\t";
+        
+        for(list<AdjacentNode>::iterator j=adj[i].begin();j!=adj[i].end();j++)
+        {
+            cout<<(*j).v+1<<" ";
+        }
+        cout<<endl;
+        
+    }
+}
 int main()
 { 
      // Create a graph given in the above diagram
-    Graph g(4,false);
-    g.addEdge(0, 1,6);
-    g.addEdge(1, 2,20);
-    g.addEdge(1, 3,30);
+    Graph g(30);
+    //g.addEdge(0, 1,6);
+   // g.addEdge(1, 2,20);
+  //  g.addEdge(1, 3,30);
    // g.addEdge(2, 0);
-    g.addEdge(2, 3,1);
+  //  g.addEdge(2, 3,1);
    // g.addEdge(3, 3);
-
+    g.CreateSnakeAndLadder(4,4);
  
-    cout << "Following is Breadth First Traversal "
-         << "(starting from vertex 2) \n";
-   g.LongestPathUndirectedGraph();
+   
+   //g.LongestPathUndirectedGraph();
 
-    cout<<g.DetectCycleDirected();
+    //cout<<g.DetectCycleDirected();
+    g.showGraph();
     return 0;
 
 }
