@@ -53,6 +53,9 @@ class Graph
     void LongestPathUndirectedGraph();  
     void TopologicalSortUtil(int source,bool * visited,stack<int> order);
     void TopologicalSort();
+    stack<int> findMinPathUtil(int start,bool * visited,map<int ,stack<int>> stored);
+    void findMinPathUtil();
+
     /*
     this method is used to create a graph  for snakes and ladders game 
        input no of ladders and no of snakes 
@@ -321,6 +324,34 @@ void Graph::CreateSnakeAndLadder(int ladders,int snakes)
             }
     }   
 }
+
+stack<int> Graph::findMinPathUtil(int start,bool * visited,map<int ,stack<int>> stored)
+{
+    if(visited[start]==false)
+    {
+        visited[start]=false;
+        stack<int> out;
+        int j=0;
+        for(list<AdjacentNode>::iterator i=adj[start].begin();i!=adj[start].end();i++)
+        {
+            stack<int> temp;
+            if(j==0)
+                out=findMinPath((*i).v,visited,stored);
+            else 
+            {
+                temp=findMinPath((*i).v,visited,stored);
+                if(temp.size()>0&&temp.size()<out.size())
+                    out=temp;
+            }
+        }
+        out.push(start);
+        stored[start]=out;
+        return out;
+    }
+    else 
+        return stored[start];
+}
+
 void Graph::showGraph()
 {
     for(int i=0;i<vertices;i++)
@@ -346,7 +377,7 @@ int main()
   //  g.addEdge(2, 3,1);
    // g.addEdge(3, 3);
     g.CreateSnakeAndLadder(4,4);
- 
+    map<int ,stack<int>> s;
    
    //g.LongestPathUndirectedGraph();
 
